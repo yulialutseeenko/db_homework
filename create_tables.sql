@@ -1,0 +1,103 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+CREATE TYPE gender AS ENUM ('Male', 'Female', 'Other');
+CREATE TYPE role AS ENUM ('leading', 'supporting', 'background');
+
+CREATE TABLE Countries (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(64)UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Genres (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(32) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Persons (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(64) NOT NULL,
+    last_name VARCHAR(64) NOT NULL,
+    biography TEXT NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender gender NOT NULL,
+    country_id INTEGER REFERENCES Countries(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Files (
+    id SERIAL PRIMARY KEY,
+    file_name VARCHAR(256) NOT NULL,
+    mime_type VARCHAR(256) NOT NULL,
+    key VARCHAR(256) NOT NULL,
+    url VARCHAR(256) UNIQUE NOT NULL,
+	is_main BOOLEAN DEFAULT FALSE,
+    person_id INTEGER REFERENCES Persons(id)ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Movies (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(256) NOT NULL,
+    description TEXT NOT NULL,
+    budget DECIMAL NOT NULL,
+    release_date DATE NOT NULL,
+    duration INTEGER NOT NULL,
+    director_id INTEGER REFERENCES Persons(id)ON DELETE CASCADE,
+    country_id INTEGER REFERENCES Countries(id)ON DELETE CASCADE,
+    poster_id INTEGER REFERENCES Files(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE Movies_Genres (
+    id SERIAL PRIMARY KEY,
+    genre_id INTEGER REFERENCES Genres(id),
+    movie_id INTEGER REFERENCES Movies(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Users (
+    id SERIAL PRIMARY KEY,
+    email CITEXT UNIQUE NOT NULL,
+    password VARCHAR(256) NOT NULL,
+    username VARCHAR(64) UNIQUE NOT NULL,
+    first_name VARCHAR(64) NOT NULL,
+    last_name VARCHAR(64) NOT NULL,
+    avatar_id INTEGER REFERENCES Files(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Favorites_Movies (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES Users(id) ON DELETE CASCADE,
+    movie_id INTEGER REFERENCES Movies(id)ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Characters (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(32) NOT NULL,
+    description TEXT NOT NULL,
+    role role NOT NULL,
+    actor_id INTEGER REFERENCES Persons(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Movies_Cast (
+    id SERIAL PRIMARY KEY,
+    movie_id INTEGER REFERENCES Movies(id) ON DELETE CASCADE,
+    actor_id INTEGER REFERENCES Persons(id),
+    character_id INTEGER REFERENCES Characters(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
