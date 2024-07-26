@@ -46,7 +46,6 @@ erDiagram
 
     }
     Persons }|--|| Countries : country_id
-    Persons ||--|| Files : main_photo_id
     Persons o|--o{ Files : person_id
     Persons{
         int id PK
